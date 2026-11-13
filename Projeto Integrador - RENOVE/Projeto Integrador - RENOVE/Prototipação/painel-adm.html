@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RE9 - Terminal do Operador (ADM)</title>
+    <!-- FontAwesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* RESET E ESTILOS GERAIS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #032b20;
+            color: #ecfdf5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CABEÇALHO */
+        .cabecalho-adm {
+            background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+            padding: 16px 24px;
+            border-bottom: 1px solid #059669;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-marca {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 800;
+            color: #34d399;
+        }
+
+        .botao-sair {
+            background-color: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .botao-sair:hover {
+            background-color: #ef4444;
+            color: #ffffff;
+        }
+
+        /* CONTAINER PRINCIPAL */
+        .conteiner-adm {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .painel-card {
+            background: linear-gradient(145deg, #044e3a 0%, #033b2c 100%);
+            border-radius: 18px;
+            padding: 20px;
+            border: 1px solid #059669;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .titulo-passo {
+            font-size: 15px;
+            font-weight: 700;
+            color: #34d399;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .numero-passo {
+            background-color: #10b981;
+            color: #022c22;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .grupo-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .campo-texto {
+            flex: 1;
+            background-color: rgba(2, 44, 34, 0.8);
+            border: 1px solid #065f46;
+            color: #ffffff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .campo-texto:focus {
+            border-color: #34d399;
+        }
+
+        .botao-acao {
+            background-color: #10b981;
+            color: #022c22;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .mensagem-erro {
+            font-size: 12px;
+            color: #fca5a5;
+            background-color: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .cartao-aluno-encontrado {
+            background-color: rgba(2, 44, 34, 0.6);
+            border: 1px solid #10b981;
+            padding: 14px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .caixa-previa-vazia {
+            text-align: center;
+            color: #a7f3d0;
+            padding: 30px;
+            font-size: 13px;
+            opacity: 0.7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* LISTA DE ITENS BIPADOS */
+        .lista-itens-bipados {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .item-lista-linha {
+            background-color: rgba(2, 44, 34, 0.8);
+            border: 1px solid #065f46;
+            padding: 10px 12px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .caixa-resumo-total {
+            background-color: rgba(2, 44, 34, 0.9);
+            border: 1px solid #10b981;
+            padding: 14px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .valor-xp-destaque {
+            font-size: 22px;
+            font-weight: 900;
+            color: #facc15;
+        }
+
+        .botao-confirmar {
+            width: 100%;
+            background-color: #facc15;
+            color: #78350f;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .botao-cancelar {
+            width: 100%;
+            background-color: transparent;
+            color: #a7f3d0;
+            border: 1px solid #065f46;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
+        .mensagem-sucesso {
+            background-color: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+            color: #34d399;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        @media (min-width: 768px) {
+            .conteiner-adm {
+                grid-template-columns: 1.2fr 0.8fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO -->
+    <header class="cabecalho-adm">
+        <div class="logo-marca">
+            <i class="fa-solid fa-barcode"></i>
+            <span>RE9 — Terminal do Operador</span>
+        </div>
+        <button class="botao-sair" onclick="window.location.href='login.html'">
+            <i class="fa-solid fa-right-from-bracket"></i> Sair
+        </button>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="conteiner-adm">
+
+        <!-- COLUNA ESQUERDA: ENTRADA DE DADOS -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- PASSO 1: ALUNO -->
+            <section class="painel-card">
+                <div class="titulo-passo">
+                    <span class="numero-passo">1</span> Identificar Aluno
+                </div>
+
+                <div class="grupo-input">
+                    <input type="text" id="inputCpf" class="campo-texto" placeholder="Digite o CPF do Aluno (ex: 123.456.789-00)" maxlength="14" oninput="mascararCpf(this)">
+                    <button class="botao-acao" onclick="buscarAluno()">
+                        <i class="fa-solid fa-magnifying-glass"></i> Buscar
+                    </button>
+                </div>
+
+                <div id="erroCpf" class="mensagem-erro">
+                    <i class="fa-solid fa-triangle-exclamation"></i> CPF inválido! Digite um CPF com 11 dígitos válidos.
+                </div>
+
+                <div id="cardAluno" class="cartao-aluno-encontrado" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-user-circle" style="font-size: 28px; color: #34d399;"></i>
+                        <div>
+                            <strong id="alunoNome" style="color: #ffffff; font-size: 14px;">Pedro Kaíky</strong>
+                            <p id="alunoMatricula" style="font-size: 11px; color: #a7f3d0;">CPF: 123.456.789-00 | IFSP Campus Bauru</p>
+                        </div>
+                    </div>
+                    <span style="background-color: #10b981; color: #022c22; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 6px;">ATIVO</span>
+                </div>
+            </section>
+
+            <!-- PASSO 2: BIPAGEM -->
+            <section class="painel-card">
+                <div class="titulo-passo">
+                    <span class="numero-passo">2</span> Bipar Embalagens
+                </div>
+
+                <div class="grupo-input">
+                    <input type="text" id="inputBarcode" class="campo-texto" placeholder="Aguardando bipagem..." onkeypress="tratarEnter(event)" disabled>
+                </div>
+
+                <div id="erroBarcode" class="mensagem-erro">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Código inválido! O EAN-13 deve ter 13 dígitos válidos.
+                </div>
+
+                <p style="font-size: 11px; color: #a7f3d0; opacity: 0.8;">
+                    <i class="fa-solid fa-circle-info"></i> O leitor USB insere o código automaticamente no campo.
+                </p>
+            </section>
+
+        </div>
+
+        <!-- COLUNA DIREITA: LISTA DE ITENS E CONFIRMAÇÃO -->
+        <div>
+            <section class="painel-card">
+                <div class="titulo-passo">
+                    <span class="numero-passo">3</span> Resumo do Descarte
+                </div>
+
+                <!-- ESTADO VAZIO -->
+                <div id="painelVazio" class="caixa-previa-vazia">
+                    <i class="fa-solid fa-box-open" style="font-size: 32px; color: #059669;"></i>
+                    <p>Nenhum item bipado até o momento.</p>
+                </div>
+
+                <!-- LISTA COM OS ITENS BIPADOS -->
+                <div id="painelPrevia" style="display: none; flex-direction: column; gap: 10px;">
+                    <div id="containerListaItens" class="lista-itens-bipados"></div>
+
+                    <div class="caixa-resumo-total">
+                        <div>
+                            <span style="font-size: 11px; color: #a7f3d0; display: block;">Total Acumulado:</span>
+                            <strong id="contadorItensTotal" style="font-size: 13px; color: #ffffff;">0 itens</strong>
+                        </div>
+                        <span id="totalXpExibido" class="valor-xp-destaque">+0 XP</span>
+                    </div>
+
+                    <div id="mensagemSucesso" class="mensagem-sucesso" style="display: none;"></div>
+
+                    <button id="btnConfirmar" class="botao-confirmar" onclick="confirmarECreditar()">
+                        <i class="fa-solid fa-check"></i> Confirmar e Creditar Tudo
+                    </button>
+                    <button class="botao-cancelar" onclick="cancelarBipagem()">Limpar Lista</button>
+                </div>
+
+            </section>
+        </div>
+
+    </main>
+
+    <!-- SCRIPT DE LÓGICA E BANCO DE PRODUTOS ATUALIZADO -->
+    <script>
+        // BANCO DE PRODUTOS ATUALIZADO CONFORME A NOVA TABELA
+        const BANCO_PRODUTOS = {
+            "7891000100001": { nome: "Garrafa PET comum (até 1,5 L)", categoria: "Plástico", xp: 50 },
+            "7891000100002": { nome: "Garrafa PET grande (acima de 1,5 L)", categoria: "Plástico", xp: 80 },
+            "7896052603497": { nome: "Garrafa de vidro", categoria: "Vidro", xp: 150 },
+            "9002490229160": { nome: "Lata de alumínio de 350 ml", categoria: "Alumínio", xp: 30 },
+            "7891000200003": { nome: "Lata de alumínio acima de 350 ml", categoria: "Alumínio", xp: 45 },
+            "7891000400001": { nome: "Lata de aço até 500 g", categoria: "Aço / Metal", xp: 60 },
+            "7891000400002": { nome: "Lata de aço acima de 500 g", categoria: "Aço / Metal", xp: 90 }
+        };
+
+        let alunoSelecionado = null;
+        let listaItensBipados = [];
+
+        // MÁSCARA E VALIDADOR CPF
+        function mascararCpf(input) {
+            let v = input.value.replace(/\D/g, "");
+            if (v.length > 11) v = v.slice(0, 11);
+            v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            v = v.replace(/(\d{3})(\d)/, "$1.$2");
+            v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+            input.value = v;
+        }
+
+        function validarCPF(cpfLimpo) {
+            if (cpfLimpo.length !== 11 || /^(\d)\1{10}$/.test(cpfLimpo)) return false;
+            let soma = 0, resto;
+            for (let i = 1; i <= 9; i++) soma += parseInt(cpfLimpo.substring(i - 1, i)) * (11 - i);
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(cpfLimpo.substring(9, 10))) return false;
+            soma = 0;
+            for (let i = 1; i <= 10; i++) soma += parseInt(cpfLimpo.substring(i - 1, i)) * (12 - i);
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(cpfLimpo.substring(10, 11))) return false;
+            return true;
+        }
+
+        function buscarAluno() {
+            const rawCpf = document.getElementById('inputCpf').value;
+            const cpfLimpo = rawCpf.replace(/\D/g, '');
+            const erroCpf = document.getElementById('erroCpf');
+
+            if (!validarCPF(cpfLimpo)) {
+                erroCpf.style.display = 'block';
+                document.getElementById('cardAluno').style.display = 'none';
+                return;
+            }
+
+            erroCpf.style.display = 'none';
+            alunoSelecionado = { nome: "Pedro Kaíky", cpf: rawCpf };
+            document.getElementById('alunoMatricula').innerText = `CPF: ${rawCpf} | IFSP Campus Bauru`;
+            document.getElementById('cardAluno').style.display = 'flex';
+            
+            const campoBarcode = document.getElementById('inputBarcode');
+            campoBarcode.disabled = false;
+            campoBarcode.focus();
+        }
+
+        // VALIDADOR EAN-13
+        function validarEAN13(codigo) {
+            if (!/^\d{13}$/.test(codigo)) return false;
+            const digitos = codigo.split('').map(Number);
+            const digitoVerificador = digitos.pop();
+            const soma = digitos.reduce((acc, val, idx) => acc + (idx % 2 === 1 ? val * 3 : val), 0);
+            const resto = soma % 10;
+            const digitoCalculado = resto === 0 ? 0 : 10 - resto;
+            return digitoCalculado === digitoVerificador;
+        }
+
+        function tratarEnter(evento) {
+            if (evento.key === 'Enter') {
+                const codigo = evento.target.value.trim();
+                const erroBarcode = document.getElementById('erroBarcode');
+
+                if (!validarEAN13(codigo)) {
+                    erroBarcode.style.display = 'block';
+                    document.getElementById('inputBarcode').value = '';
+                    return;
+                }
+
+                erroBarcode.style.display = 'none';
+                adicionarItemALista(codigo);
+                document.getElementById('inputBarcode').value = '';
+                document.getElementById('inputBarcode').focus();
+            }
+        }
+
+        // ADICIONA O ITEM Á LISTA
+        function adicionarItemALista(codigo) {
+            const produto = BANCO_PRODUTOS[codigo] || {
+                nome: "Embalagem Reciclável Genérica",
+                categoria: "Diversos",
+                xp: 50
+            };
+
+            listaItensBipados.push(produto);
+            atualizarExibicaoLista();
+        }
+
+        function removerItemDaLista(index) {
+            listaItensBipados.splice(index, 1);
+            atualizarExibicaoLista();
+        }
+
+        function atualizarExibicaoLista() {
+            const container = document.getElementById('containerListaItens');
+            container.innerHTML = '';
+
+            if (listaItensBipados.length === 0) {
+                document.getElementById('painelPrevia').style.display = 'none';
+                document.getElementById('painelVazio').style.display = 'flex';
+                return;
+            }
+
+            document.getElementById('painelVazio').style.display = 'none';
+            document.getElementById('painelPrevia').style.display = 'flex';
+
+            let totalXp = 0;
+
+            listaItensBipados.forEach((item, index) => {
+                totalXp += item.xp;
+                const div = document.createElement('div');
+                div.className = 'item-lista-linha';
+                div.innerHTML = `
+                    <div>
+                        <strong style="color: #ffffff;">${item.nome}</strong>
+                        <div style="font-size: 10px; color: #a7f3d0;">${item.categoria}</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="color: #facc15; font-weight: 800;">+${item.xp} XP</span>
+                        <i class="fa-solid fa-trash" style="color: #fca5a5; cursor: pointer;" onclick="removerItemDaLista(${index})"></i>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('contadorItensTotal').innerText = `${listaItensBipados.length} item(ns)`;
+            document.getElementById('totalXpExibido').innerText = `+${totalXp} XP`;
+        }
+
+        // CONFIRMAÇÃO E SINCRONIZAÇÃO EM TEMPO REAL
+        function confirmarECreditar() {
+            if(!alunoSelecionado || listaItensBipados.length === 0) return;
+
+            const btn = document.getElementById('btnConfirmar');
+            btn.disabled = true;
+            btn.innerText = "Creditando...";
+
+            const totalXp = listaItensBipados.reduce((soma, item) => soma + item.xp, 0);
+
+            const dadosDescarte = {
+                nome: `${listaItensBipados.length} item(ns) [${listaItensBipados[0].nome}]`,
+                xp: totalXp,
+                qtdItens: listaItensBipados.length,
+                horario: new Date().getTime()
+            };
+
+            // Envia evento de atualização para a aba do usuário
+            localStorage.setItem('dadosUltimoDescarte', JSON.stringify(dadosDescarte));
+
+            const msg = document.getElementById('mensagemSucesso');
+            msg.innerText = `Sucesso! +${totalXp} XP creditados para ${alunoSelecionado.nome}!`;
+            msg.style.display = 'block';
+
+            setTimeout(() => {
+                cancelarBipagem();
+                msg.style.display = 'none';
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-check"></i> Confirmar e Creditar Tudo`;
+            }, 1800);
+        }
+
+        function cancelarBipagem() {
+            listaItensBipados = [];
+            document.getElementById('inputBarcode').value = '';
+            atualizarExibicaoLista();
+            document.getElementById('inputBarcode').focus();
+        }
+    </script>
+</body>
+</html>
