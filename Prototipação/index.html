@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RE9 - Início e Ecopontos</title>
+    <!-- FontAwesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Leaflet CSS para o mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        /* RESET E ESTILOS GERAIS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        html, body {
+            width: 100%;
+            min-height: 100vh;
+            background-color: #032b20;
+            color: #ecfdf5;
+        }
+
+        body {
+            padding-bottom: 80px;
+            overflow-x: hidden;
+        }
+
+        /* CABEÇALHO SUPERIOR */
+        .cabecalho-principal {
+            background: linear-gradient(135deg, #064e3b 0%, #022c22 100%);
+            padding: 16px 20px;
+            border-bottom: 1px solid #059669;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .conteudo-cabecalho {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-marca {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 800;
+            color: #34d399;
+        }
+
+        .acoes-cabecalho {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* MENU DESKTOP NO CABEÇALHO */
+        .menu-desktop {
+            display: none;
+            gap: 8px;
+        }
+
+        .btn-aba-desktop {
+            background: transparent;
+            border: none;
+            color: #a7f3d0;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .btn-aba-desktop.ativo, .btn-aba-desktop:hover {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .botao-sair {
+            background-color: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .botao-sair:hover {
+            background-color: #ef4444;
+            color: #ffffff;
+        }
+
+        /* GERENCIADOR DE ABAS DA TELA */
+        .aba-conteudo {
+            display: none;
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+
+        .aba-conteudo.ativa {
+            display: block;
+        }
+
+        /* LAYOUT ABA 1 (INÍCIO) */
+        .grid-inicio {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .cartao-usuario {
+            background: linear-gradient(145deg, #065f46 0%, #044e3a 100%);
+            border-radius: 18px;
+            padding: 20px;
+            border: 1px solid #10b981;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .info-aluno {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .aluno-dados {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .foto-icone-aluno {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .selo-sequencia {
+            background-color: rgba(245, 158, 11, 0.15);
+            border: 1px solid #f59e0b;
+            color: #fbbf24;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .caixa-progresso {
+            background-color: rgba(2, 44, 34, 0.7);
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .linha-pontos {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .texto-xp-destaque {
+            font-size: 28px;
+            font-weight: 900;
+            color: #facc15;
+            line-height: 1;
+        }
+
+        .selo-patente {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .fundo-barra-progresso {
+            width: 100%;
+            height: 10px;
+            background-color: #022c22;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #065f46;
+        }
+
+        .preenchimento-barra-progresso {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            border-radius: 6px;
+            transition: width 0.6s ease;
+        }
+
+        .grade-dupla {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .cartao-metrica {
+            background: linear-gradient(145deg, #044e3a 0%, #033b2c 100%);
+            padding: 16px;
+            border-radius: 14px;
+            border: 1px solid #059669;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icone-metrica {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .secao-bloco {
+            background: linear-gradient(145deg, #044e3a 0%, #033b2c 100%);
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid #059669;
+            width: 100%;
+        }
+
+        .titulo-secao {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #34d399;
+        }
+
+        .item-historico {
+            padding: 10px 12px;
+            background-color: rgba(2, 44, 34, 0.6);
+            border: 1px solid #065f46;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .container-mapa-wrapper {
+            width: 100%;
+            height: 220px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #10b981;
+        }
+
+        #mapa-ecopontos {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ESTILOS DA TABELA DE XP, EDUCAÇÃO E PERFIL */
+        .tabela-custom {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .tabela-custom th, .tabela-custom td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .tabela-custom th {
+            color: #34d399;
+            background-color: rgba(2, 44, 34, 0.6);
+        }
+
+        .artigo-card {
+            background: linear-gradient(145deg, #044e3a 0%, #033b2c 100%);
+            border: 1px solid #059669;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            line-height: 1.6;
+            font-size: 13px;
+            color: #d1fae5;
+        }
+
+        /* BARRA INFERIOR (MENU MOBILE FIXO) */
+        .barramenu-inferior {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #022c22;
+            border-top: 1px solid #059669;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 9999;
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .item-menu {
+            text-decoration: none;
+            color: #6ee7b7;
+            font-size: 10px;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .item-menu.ativo {
+            opacity: 1;
+            color: #34d399;
+            font-weight: 700;
+        }
+
+        /* ADAPTAÇÃO PARA DESKTOP */
+        @media (min-width: 768px) {
+            body {
+                padding-bottom: 20px;
+            }
+
+            .barramenu-inferior {
+                display: none;
+            }
+
+            .menu-desktop {
+                display: flex;
+            }
+
+            .grid-inicio {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+            }
+
+            .container-mapa-wrapper {
+                height: 320px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO -->
+    <header class="cabecalho-principal">
+        <div class="conteudo-cabecalho">
+            <div class="logo-marca">
+                <i class="fa-solid fa-recycle"></i>
+                <span>RE9</span>
+            </div>
+
+            <!-- MENU NO CABEÇALHO (PC) -->
+            <nav class="menu-desktop">
+                <button class="btn-aba-desktop ativo" onclick="trocarAba('inicio')">
+                    <i class="fa-solid fa-house"></i> Início
+                </button>
+                <button class="btn-aba-desktop" onclick="trocarAba('tabela-xp')">
+                    <i class="fa-solid fa-list-check"></i> Tabela XP
+                </button>
+                <button class="btn-aba-desktop" onclick="trocarAba('educacao')">
+                    <i class="fa-solid fa-book-open"></i> Educação
+                </button>
+                <button class="btn-aba-desktop" onclick="trocarAba('perfil')">
+                    <i class="fa-solid fa-id-card"></i> Perfil
+                </button>
+            </nav>
+
+            <div class="acoes-cabecalho">
+                <button class="botao-sair" onclick="window.location.href='login.html'">
+                    <i class="fa-solid fa-right-from-bracket"></i> Sair
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ABA 1: INÍCIO E ECOPONTOS -->
+    <main id="aba-inicio" class="aba-conteudo ativa">
+        <div class="grid-inicio">
+            
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- PERFIL DO USUÁRIO -->
+                <section class="cartao-usuario">
+                    <div class="info-aluno">
+                        <div class="aluno-dados">
+                            <div class="foto-icone-aluno">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+                            <div>
+                                <h2 class="nome-aluno" style="font-size: 16px; color: #fff;">Pedro Kaíky</h2>
+                                <p style="font-size: 11px; color: #a7f3d0;">IFSP Campus Bauru / Agudos</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="caixa-progresso">
+                        <div class="linha-pontos">
+                            <div>
+                                <span style="font-size: 11px; color: #6ee7b7; font-weight: 700; text-transform: uppercase;">Saldo de Experiência</span>
+                                <div id="textoPontosXp" class="texto-xp-destaque">0 XP</div>
+                            </div>
+                            <span id="textoPatente" class="selo-patente">Nível 1 — Reciclador</span>
+                        </div>
+
+                        <div class="fundo-barra-progresso">
+                            <div id="barraProgressoXp" class="preenchimento-barra-progresso"></div>
+                        </div>
+                        <p id="textoFaltaXp" style="font-size: 10px; color: #a7f3d0; text-align: right; margin-top: 4px;">Faltam 500 XP para o Nível 2</p>
+                    </div>
+                </section>
+
+                <!-- MÉTRICAS -->
+                <section class="grade-dupla">
+                    <div class="cartao-metrica">
+                        <div class="icone-metrica">
+                            <i class="fa-solid fa-box-archive"></i>
+                        </div>
+                        <div>
+                            <strong id="contadorItens" style="font-size: 16px; color: #ffffff;">0</strong>
+                            <p style="font-size: 10px; color: #a7f3d0;">Itens Reciclados</p>
+                        </div>
+                    </div>
+
+                    <div class="cartao-metrica">
+                        <div class="icone-metrica" style="background-color: rgba(56, 189, 248, 0.2); color: #38bdf8;">
+                            <i class="fa-solid fa-cloud-arrow-down"></i>
+                        </div>
+                        <div>
+                            <strong id="contadorCo2" style="font-size: 16px; color: #ffffff;">0.0 kg</strong>
+                            <p style="font-size: 10px; color: #7dd3fc;">CO₂ Evitado</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- HISTÓRICO -->
+                <section class="secao-bloco">
+                    <div class="titulo-secao">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Histórico de Reciclagem
+                    </div>
+
+                    <div id="mensagemHistoricoVazio" style="text-align: center; color: #a7f3d0; padding: 10px; font-size: 11px; opacity: 0.7;">
+                        Nenhum item reciclado até o momento.
+                    </div>
+
+                    <div id="listaHistoricoDescartes"></div>
+                </section>
+            </div>
+
+            <!-- MAPA -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <section class="secao-bloco">
+                    <div class="titulo-secao">
+                        <i class="fa-solid fa-location-dot"></i> Ecopontos da Região
+                    </div>
+                    <div class="container-mapa-wrapper">
+                        <div id="mapa-ecopontos"></div>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- ABA 2: TABELA DE XP -->
+    <section id="aba-tabela-xp" class="aba-conteudo">
+        <div class="secao-bloco" style="margin-bottom: 20px;">
+            <div class="titulo-secao">
+                <i class="fa-solid fa-recycle"></i> Pontuação por Material
+            </div>
+            <table class="tabela-custom">
+                <thead>
+                    <tr>
+                        <th>Material</th>
+                        <th>Categoria</th>
+                        <th>Recompensa</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Garrafa PET comum (até 1,5 L)</td>
+                        <td>Plástico</td>
+                        <td><strong style="color: #facc15;">+50 XP</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Garrafa PET grande (acima de 1,5 L)</td>
+                        <td>Plástico</td>
+                        <td><strong style="color: #facc15;">+80 XP</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Garrafa de vidro</td>
+                        <td>Vidro</td>
+                        <td><strong style="color: #facc15;">+150 XP</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Lata de alumínio de 350 ml</td>
+                        <td>Alumínio</td>
+                        <td><strong style="color: #facc15;">+30 XP</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Lata de alumínio acima de 350 ml</td>
+                        <td>Alumínio</td>
+                        <td><strong style="color: #facc15;">+45 XP</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Lata de aço até 500 g</td>
+                        <td>Aço / Metal</td>
+                        <td><strong style="color: #facc15;">+60 XP</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Lata de aço acima de 500 g</td>
+                        <td>Aço / Metal</td>
+                        <td><strong style="color: #facc15;">+90 XP</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="secao-bloco">
+            <div class="titulo-secao">
+                <i class="fa-solid fa-trophy"></i> Patentes e Níveis
+            </div>
+            <table class="tabela-custom">
+                <thead>
+                    <tr>
+                        <th>Nível</th>
+                        <th>Patente</th>
+                        <th>XP Necessário</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Nível 1</td>
+                        <td>Reciclador</td>
+                        <td>0 - 500 XP</td>
+                    </tr>
+                    <tr>
+                        <td>Nível 2</td>
+                        <td>Renovador</td>
+                        <td>500 - 1.500 XP</td>
+                    </tr>
+                    <tr>
+                        <td>Nível 3</td>
+                        <td>Experiente em reciclar</td>
+                        <td>1.500 - 3.000 XP</td>
+                    </tr>
+                    <tr>
+                        <td>Nível 4</td>
+                        <td>Salvador das plantas</td>
+                        <td>3.000 - 5.000 XP</td>
+                    </tr>
+                    <tr>
+                        <td>Nível 5</td>
+                        <td>Expert em renovar</td>
+                        <td>5.000 - 10.000 XP</td>
+                    </tr>
+                    <tr>
+                        <td>Nível 6</td>
+                        <td>A esperança da Terra</td>
+                        <td>10.000 - 25.000 XP</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- ABA 3: EDUCAÇÃO -->
+    <section id="aba-educacao" class="aba-conteudo">
+        <article class="artigo-card">
+            <h2 style="color: #34d399; font-size: 18px; margin-bottom: 10px;">
+                <i class="fa-solid fa-leaf"></i> Por que reciclar no campus?
+            </h2>
+            <p style="margin-bottom: 10px;">
+                A reciclagem adequada de embalagens reduz diretamente a extração de matérias-primas virgens e diminui a emissão de gases do efeito estufa.
+            </p>
+            <p>
+                No IFSP, o projeto RE9 incentiva o descarte correto de alumínio, plástico, vidro e aço através da gamificação, transformando ações individuais em impacto sustentável coletivo.
+            </p>
+        </article>
+
+        <article class="artigo-card">
+            <h3 style="color: #34d399; font-size: 15px; margin-bottom: 8px;">
+                <i class="fa-solid fa-lightbulb"></i> Dica do Ecoponto
+            </h3>
+            <p>
+                Sempre higienize levemente as garrafas e latas antes de descartar no Ecoponto para facilitar o processo de triagem e reciclagem.
+            </p>
+        </article>
+    </section>
+
+    <!-- ABA 4: PERFIL -->
+    <section id="aba-perfil" class="aba-conteudo">
+        <div class="secao-bloco">
+            <div class="titulo-secao">
+                <i class="fa-solid fa-id-card"></i> Dados do Estudante
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+                <p><strong>Nome:</strong> Pedro Kaíky</p>
+                <p><strong>Instituição:</strong> IFSP Campus Bauru / Agudos</p>
+                <p><strong>Status da Conta:</strong> <span style="color: #34d399; font-weight: 700;">Ativo</span></p>
+            </div>
+            <button class="botao-sair" style="margin-top: 20px; width: 100%; justify-content: center; padding: 12px;" onclick="window.location.href='login.html'">
+                <i class="fa-solid fa-right-from-bracket"></i> Sair do Aplicativo
+            </button>
+        </div>
+    </section>
+
+    <!-- NAVEGAÇÃO MOBILE (MENU FIXO RODAPÉ) -->
+    <nav class="barramenu-inferior">
+        <button class="item-menu ativo" onclick="trocarAba('inicio')">
+            <i class="fa-solid fa-house" style="font-size: 16px;"></i> Início
+        </button>
+        <button class="item-menu" onclick="trocarAba('tabela-xp')">
+            <i class="fa-solid fa-list-check" style="font-size: 16px;"></i> Tabela XP
+        </button>
+        <button class="item-menu" onclick="trocarAba('educacao')">
+            <i class="fa-solid fa-book-open" style="font-size: 16px;"></i> Educação
+        </button>
+        <button class="item-menu" onclick="trocarAba('perfil')">
+            <i class="fa-solid fa-id-card" style="font-size: 16px;"></i> Perfil
+        </button>
+    </nav>
+
+    <!-- LEAFLET JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- SCRIPT DE NAVEGAÇÃO E LÓGICA -->
+    <script>
+        // 1. GERENCIADOR DE ABAS
+        function trocarAba(nomeAba) {
+            document.querySelectorAll('.aba-conteudo').forEach(aba => aba.classList.remove('ativa'));
+            document.querySelectorAll('.item-menu').forEach(btn => btn.classList.remove('ativo'));
+            document.querySelectorAll('.btn-aba-desktop').forEach(btn => btn.classList.remove('ativo'));
+
+            document.getElementById(`aba-${nomeAba}`).classList.add('ativa');
+
+            if(nomeAba === 'inicio' && mapa) {
+                setTimeout(() => mapa.invalidateSize(), 200);
+            }
+        }
+
+        // 2. INICIALIZAÇÃO DO MAPA
+        const latInicial = -22.295031;
+        const lngInicial = -49.092665;
+
+        const mapa = L.map('mapa-ecopontos').setView([latInicial, lngInicial], 13);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(mapa);
+
+        L.marker([latInicial, lngInicial]).addTo(mapa)
+            .bindPopup("<b>Ecoponto IFSP</b><br>Pátio Central — Aberto para entregas.");
+
+        // 3. VARIÁVEIS DE ESTADO
+        let pontosXpAcumulados = 0;
+        let quantidadeItensEntregues = 0;
+        let estimativaCo2Evitado = 0.0;
+
+        // ESTRUTURA DOS NÍVEIS
+        const TABELA_NIVEIS = [
+            { min: 0, max: 500, nivel: 1, patente: "Reciclador" },
+            { min: 500, max: 1500, nivel: 2, patente: "Renovador" },
+            { min: 1500, max: 3000, nivel: 3, patente: "Experiente em reciclar" },
+            { min: 3000, max: 5000, nivel: 4, patente: "Salvador das plantas" },
+            { min: 5000, max: 10000, nivel: 5, patente: "Expert em renovar" },
+            { min: 10000, max: 25000, nivel: 6, patente: "A esperança da Terra" }
+        ];
+
+        function atualizarInterfaceUsuario() {
+            document.getElementById('textoPontosXp').innerText = `${pontosXpAcumulados} XP`;
+            document.getElementById('contadorItens').innerText = quantidadeItensEntregues;
+            document.getElementById('contadorCo2').innerText = `${estimativaCo2Evitado.toFixed(1)} kg`;
+
+            // Identifica o nível atual com base na pontuação acumulada
+            let nivelAtual = TABELA_NIVEIS[0];
+            for (let i = 0; i < TABELA_NIVEIS.length; i++) {
+                if (pontosXpAcumulados >= TABELA_NIVEIS[i].min) {
+                    nivelAtual = TABELA_NIVEIS[i];
+                }
+            }
+
+            // Progresso relativo da barra dentro da faixa do nível corrente
+            const xpNoNivel = pontosXpAcumulados - nivelAtual.min;
+            const intervaloNivel = nivelAtual.max - nivelAtual.min;
+            const porcentagemBarra = Math.min((xpNoNivel / intervaloNivel) * 100, 100);
+
+            const faltamPontos = Math.max(0, nivelAtual.max - pontosXpAcumulados);
+
+            document.getElementById('barraProgressoXp').style.width = `${porcentagemBarra}%`;
+            document.getElementById('textoPatente').innerText = `Nível ${nivelAtual.nivel} — ${nivelAtual.patente}`;
+            
+            if (nivelAtual.nivel < 6) {
+                document.getElementById('textoFaltaXp').innerText = `Faltam ${faltamPontos} XP para o Nível ${nivelAtual.nivel + 1}`;
+            } else {
+                document.getElementById('textoFaltaXp').innerText = `Nível Máximo Alcançado!`;
+            }
+        }
+
+        function adicionarItemAoHistorico(nomeMaterial, xpGanho) {
+            const msgVazia = document.getElementById('mensagemHistoricoVazio');
+            if (msgVazia) msgVazia.style.display = 'none';
+            
+            const listaHistorico = document.getElementById('listaHistoricoDescartes');
+
+            const itemHtml = document.createElement('div');
+            itemHtml.className = "item-historico";
+            itemHtml.innerHTML = `
+                <div>
+                    <strong style="color: #ffffff;">${nomeMaterial}</strong>
+                    <div style="font-size: 10px; color: #a7f3d0;">Registrado no Ecoponto</div>
+                </div>
+                <span style="color: #facc15; font-weight: 800; font-size: 13px;">+${xpGanho} XP</span>
+            `;
+
+            listaHistorico.prepend(itemHtml);
+        }
+
+        // 4. ESCUTA DE EVENTOS ADM (TEMPO REAL)
+        let ultimoHorarioProcessado = 0;
+
+        function verificarNovosDescartes() {
+            const dadosSalvos = localStorage.getItem('dadosUltimoDescarte');
+            
+            if (dadosSalvos) {
+                const descarte = JSON.parse(dadosSalvos);
+                
+                if (descarte.horario && descarte.horario > ultimoHorarioProcessado) {
+                    ultimoHorarioProcessado = descarte.horario;
+                    
+                    pontosXpAcumulados += descarte.xp;
+                    const qtdNovosItens = descarte.qtdItens || 1;
+                    quantidadeItensEntregues += qtdNovosItens;
+                    estimativaCo2Evitado += (qtdNovosItens * 0.2);
+
+                    atualizarInterfaceUsuario();
+                    adicionarItemAoHistorico(descarte.nome, descarte.xp);
+                }
+            }
+        }
+
+        //localStorage.clear();
+
+        setInterval(verificarNovosDescartes, 1000);
+        atualizarInterfaceUsuario();
+    </script>
+</body>
+</html>/

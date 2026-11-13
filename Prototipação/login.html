@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RE9 - Acesso ao Sistema</title>
+    <!-- FontAwesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* RESET E ESTILOS GERAIS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #032b20;
+            color: #ecfdf5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        /* CARD DE LOGIN */
+        .cartao-login {
+            background: linear-gradient(145deg, #065f46 0%, #044e3a 100%);
+            border-radius: 20px;
+            padding: 28px 24px;
+            border: 1px solid #10b981;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* MARCA / CABEÇALHO DO CARD */
+        .cabecalho-login {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icone-logo {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #ffffff;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35);
+            margin-bottom: 4px;
+        }
+
+        .titulo-app {
+            font-size: 24px;
+            font-weight: 800;
+            color: #34d399;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitulo-app {
+            font-size: 12px;
+            color: #a7f3d0;
+        }
+
+        /* FORMULÁRIO */
+        .formulario-login {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .grupo-campo {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .rotulo-campo {
+            font-size: 11px;
+            font-weight: 700;
+            color: #6ee7b7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .caixa-input {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .icone-input {
+            position: absolute;
+            left: 14px;
+            color: #34d399;
+            font-size: 14px;
+        }
+
+        .input-texto {
+            width: 100%;
+            background-color: rgba(2, 44, 34, 0.8);
+            border: 1px solid #065f46;
+            color: #ffffff;
+            padding: 12px 14px 12px 40px;
+            border-radius: 10px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-texto:focus {
+            border-color: #34d399;
+        }
+
+        /* BOTÃO DE ENTRADA */
+        .botao-entrar {
+            width: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            color: #022c22;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.1s, box-shadow 0.2s;
+            margin-top: 8px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .botao-entrar:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .rodape-login {
+            text-align: center;
+            font-size: 11px;
+            color: #a7f3d0;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+
+    <main class="cartao-login">
+        
+        <!-- MARCA -->
+        <div class="cabecalho-login">
+            <div class="icone-logo">
+                <i class="fa-solid fa-recycle"></i>
+            </div>
+            <h1 class="titulo-app">RE9</h1>
+            <p class="subtitulo-app">Sistema de Incentivo à Reciclagem — IFSP</p>
+        </div>
+
+        <!-- FORMULÁRIO DE ACESSO -->
+        <form class="formulario-login" onsubmit="realizarLogin(event)">
+            
+            <div class="grupo-campo">
+                <label class="rotulo-campo" for="inputEmail">E-mail</label>
+                <div class="caixa-input">
+                    <i class="fa-solid fa-envelope icone-input"></i>
+                    <input type="text" id="inputEmail" class="input-texto" placeholder="Digite seu e-mail" required>
+                </div>
+            </div>
+
+            <div class="grupo-campo">
+                <label class="rotulo-campo" for="inputSenha">Senha</label>
+                <div class="caixa-input">
+                    <i class="fa-solid fa-lock icone-input"></i>
+                    <input type="password" id="inputSenha" class="input-texto" placeholder="••••••••">
+                </div>
+            </div>
+
+            <button type="submit" class="botao-entrar">
+                <i class="fa-solid fa-right-to-bracket"></i> Entrar no Sistema
+            </button>
+        </form>
+
+        <footer class="rodape-login">
+            Projeto SNCT — IFSP Campus Bauru / Agudos
+        </footer>
+
+    </main>
+
+    <script>
+        function realizarLogin(evento) {
+            evento.preventDefault();
+            
+            const email = document.getElementById('inputEmail').value.trim().toLowerCase();
+
+            // Se tiver "adm" no e-mail vai para a tela do ADM, caso contrário vai para a do Aluno
+            if (email.includes('adm')) {
+                window.location.href = 'painel-adm.html';
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>

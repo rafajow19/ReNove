@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renove Sempre - Eco Reciclagem</title>
+    <!-- Phaser 3 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 1000px;
+            height: 700px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modais e Overlays UI */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 25, 20, 0.92);
+            backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.3s ease;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: #2ecc71;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(46, 204, 113, 0.4);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+
+        p.description {
+            font-size: 1.1rem;
+            max-width: 650px;
+            color: #bdc3c7;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Guia de Cores na Tela Inicial */
+        .color-guide {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            max-width: 600px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .guide-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+
+        .guide-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.3);
+        }
+
+        /* Interface da Loja */
+        .shop-modal {
+            width: 85%;
+            max-height: 80%;
+            background: #1a252f;
+            border-radius: 12px;
+            border: 1px solid #34495e;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .shop-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            text-align: left;
+        }
+
+        .shop-card h4 {
+            font-size: 1.1rem;
+            color: #f1c40f;
+        }
+
+        .shop-card p {
+            font-size: 0.85rem;
+            color: #95a5a6;
+        }
+
+        .shop-card .cost {
+            font-weight: bold;
+            color: #2ecc71;
+            font-size: 1rem;
+        }
+
+        .btn-shop {
+            background: #3498db;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            width: 100%;
+            border-radius: 6px;
+        }
+
+        .btn-shop:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .close-shop {
+            align-self: flex-end;
+            background: #e74c3c;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+        }
+
+        /* Histórico de Reciclagem */
+        #history-panel {
+            position: absolute;
+            left: 15px;
+            bottom: 120px;
+            width: 240px;
+            max-height: 180px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(6px);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 10px;
+            overflow-y: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .history-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #bdc3c7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 2px;
+        }
+
+        .history-item {
+            font-size: 0.78rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .history-success {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border-left: 3px solid #2ecc71;
+        }
+
+        .history-error {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border-left: 3px solid #e74c3c;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- Painel do Histórico -->
+        <div id="history-panel">
+            <div class="history-title">Histórico de Coleta</div>
+            <div id="history-list"></div>
+        </div>
+
+        <!-- Tela Inicial (Start Screen) -->
+        <div id="start-screen" class="overlay">
+            <h1>RENOVE SEMPRE</h1>
+            <h2>Eco Reciclagem</h2>
+            <p class="description">
+                Separe os resíduos que passam pela esteira para a lixeira correta! Ganhe XP, suba de patente e invista em upgrades para salvar o meio ambiente.
+            </p>
+
+            <div class="color-guide">
+                <div class="guide-item"><div class="guide-color" style="background: #2980b9;"></div> Papel</div>
+                <div class="guide-item"><div class="guide-color" style="background: #c0392b;"></div> Plástico</div>
+                <div class="guide-item"><div class="guide-color" style="background: #f1c40f;"></div> Metal</div>
+                <div class="guide-item"><div class="guide-color" style="background: #27ae60;"></div> Vidro</div>
+                <div class="guide-item"><div class="guide-color" style="background: #7f8c8d;"></div> E-Lixo</div>
+                <div class="guide-item"><div class="guide-color" style="background: #d35400;"></div> Orgânico</div>
+            </div>
+
+            <button class="btn" id="start-btn">INICIAR RECICLAGEM</button>
+        </div>
+
+        <!-- Interface da Loja -->
+        <div id="shop-screen" class="overlay hidden">
+            <div class="shop-modal">
+                <button class="btn close-shop" id="close-shop-btn">Fechar ✕</button>
+                <h3>Loja de Upgrades & Ajudantes</h3>
+                <p style="font-size:0.9rem; color:#bdc3c7;">Use seus pontos acumulados para otimizar sua triagem.</p>
+                
+                <div class="shop-grid">
+                    <!-- Voluntário -->
+                    <div class="shop-card">
+                        <div>
+                            <h4>Voluntário Mirim</h4>
+                            <p>Um ajudante comunitário que recicla 1 item a cada 8 segundos.</p>
+                        </div>
+                        <div class="cost" id="cost-helper-1">Custo: 100 pts</div>
+                        <button class="btn btn-shop" id="buy-helper-1">Contratar</button>
+                    </div>
+
+                    <!-- Catador -->
+                    <div class="shop-card">
+                        <div>
+                            <h4>Catador Cooperado</h4>
+                            <p>Recicla 1 item de qualquer tipo a cada 5 segundos.</p>
+                        </div>
+                        <div class="cost" id="cost-helper-2">Custo: 500 pts</div>
+                        <button class="btn btn-shop" id="buy-helper-2">Contratar</button>
+                    </div>
+
+                    <!-- Boost Esteira -->
+                    <div class="shop-card">
+                        <div>
+                            <h4>Esteira Lenta (15s)</h4>
+                            <p>Ativa um boost temporário que reduz a velocidade em 30% por 15s.</p>
+                        </div>
+                        <div class="cost" id="cost-slow">Custo: 150 pts</div>
+                        <button class="btn btn-shop" id="buy-slow">Ativar Boost</button>
+                    </div>
+
+                    <!-- Multiplicador XP -->
+                    <div class="shop-card">
+                        <div>
+                            <h4>Selo Sustentável</h4>
+                            <p>Aumenta o ganho de XP em +20% permanentemente.</p>
+                        </div>
+                        <div class="cost" id="cost-xp">Custo: 400 pts</div>
+                        <button class="btn btn-shop" id="buy-xp">Comprar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela de Game Over -->
+        <div id="game-over-screen" class="overlay hidden">
+            <h1 style="color: #e74c3c;">FIM DE JOGO</h1>
+            <p class="description" id="game-over-stats">Você acumulou pontos e ajudou a preservar o meio ambiente!</p>
+            <button class="btn" id="restart-btn">JOGAR NOVAMENTE</button>
+        </div>
+    </div>
+
+    <script>
+        // --- ÁUDIO SINTETIZADO ---
+        class SoundFX {
+            constructor() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            playSuccess() {
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(659.25, this.ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.2);
+            }
+
+            playError() {
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+
+            playBoost() {
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.4);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.4);
+            }
+        }
+
+        const sfx = new SoundFX();
+
+        // --- PATENTES ---
+        const RANKS = [
+            { level: 1, title: 'Reciclador', minXP: 0, maxXP: 500 },
+            { level: 2, title: 'Renovador', minXP: 500, maxXP: 1500 },
+            { level: 3, title: 'Experiente em reciclar', minXP: 1500, maxXP: 3000 },
+            { level: 4, title: 'Salvador das plantas', minXP: 3000, maxXP: 5000 },
+            { level: 5, title: 'Expert em renovar', minXP: 5000, maxXP: 10000 },
+            { level: 6, title: 'A esperança da Terra', minXP: 10000, maxXP: 25000 }
+        ];
+
+        // --- CATEGORIAS & ITENS COERENTES ---
+        const CATEGORIES = {
+            PAPEL: { id: 'papel', name: 'Papel', color: 0x2980b9, binX: 120 },
+            PLASTICO: { id: 'plastico', name: 'Plástico', color: 0xc0392b, binX: 270 },
+            METAL: { id: 'metal', name: 'Metal', color: 0xf1c40f, binX: 420 },
+            VIDRO: { id: 'vidro', name: 'Vidro', color: 0x27ae60, binX: 570 },
+            ELIXO: { id: 'elixo', name: 'E-Lixo', color: 0x7f8c8d, binX: 720 },
+            ORGANICO: { id: 'organico', name: 'Orgânico', color: 0xd35400, binX: 870 }
+        };
+
+        const ITEM_TYPES = [
+            { name: 'Jornal Velho', category: CATEGORIES.PAPEL, points: 10, xp: 5, icon: '📰' },
+            { name: 'Caixa Papelão', category: CATEGORIES.PAPEL, points: 10, xp: 5, icon: '📦' },
+            { name: 'Garrafa PET', category: CATEGORIES.PLASTICO, points: 10, xp: 5, icon: '🍾' },
+            { name: 'Pote Plástico', category: CATEGORIES.PLASTICO, points: 12, xp: 6, icon: '🪣' },
+            { name: 'Lata de Refri', category: CATEGORIES.METAL, points: 15, xp: 8, icon: '🥫' },
+            { name: 'Garrafa Vidro', category: CATEGORIES.VIDRO, points: 20, xp: 10, icon: '🍾' },
+            { name: 'Champanhe Vidro', category: CATEGORIES.VIDRO, points: 25, xp: 12, icon: '🥂' },
+            { name: 'Taça de Vidro', category: CATEGORIES.VIDRO, points: 20, xp: 10, icon: '🍸' },
+            { name: 'Bateria Velha', category: CATEGORIES.ELIXO, points: 35, xp: 18, icon: '🔋' },
+            { name: 'Celular Quebrado', category: CATEGORIES.ELIXO, points: 40, xp: 20, icon: '📱' },
+            { name: 'Restos de Maçã', category: CATEGORIES.ORGANICO, points: -5, xp: 0, icon: '🍎' }
+        ];
+
+        // --- CENA DO JOGO ---
+        class MainScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'MainScene' });
+            }
+
+            create() {
+                this.isGameRunning = false;
+                this.score = 0;
+                this.xp = 0;
+                this.lives = 5;
+                this.combo = 0;
+                this.xpMultiplier = 1.0;
+
+                this.baseConveyorSpeed = 120;
+                this.slowBoostTimer = 0;
+
+                this.helper1Level = 0;
+                this.helper2Level = 0;
+                this.helper1Timer = 0;
+                this.helper2Timer = 0;
+
+                this.activeItems = [];
+
+                this.createBackground();
+                this.createConveyor();
+                this.createBins();
+                this.createHUD();
+
+                this.input.dragDistanceThreshold = 5;
+                this.input.on('dragstart', this.onDragStart, this);
+                this.input.on('drag', this.onDrag, this);
+                this.input.on('dragend', this.onDragEnd, this);
+
+                this.spawnTimer = 0;
+            }
+
+            createBackground() {
+                const bg = this.add.graphics();
+                bg.fillGradientStyle(0x1e272e, 0x1e272e, 0x0f171e, 0x0f171e, 1);
+                bg.fillRect(0, 0, 1000, 700);
+
+                bg.lineStyle(1, 0xffffff, 0.03);
+                for (let x = 0; x < 1000; x += 40) bg.lineBetween(x, 0, x, 700);
+                for (let y = 0; y < 700; y += 40) bg.lineBetween(0, y, 1000, y);
+            }
+
+            createConveyor() {
+                this.conveyorY = 220;
+                const g = this.add.graphics();
+                g.fillStyle(0x2c3e50, 1);
+                g.fillRect(0, this.conveyorY - 35, 1000, 70);
+                g.fillStyle(0x34495e, 1);
+                g.fillRect(0, this.conveyorY - 25, 1000, 50);
+
+                this.conveyorLines = [];
+                for (let x = 0; x < 1040; x += 60) {
+                    let line = this.add.rectangle(x, this.conveyorY, 8, 45, 0x1a252f);
+                    this.conveyorLines.push(line);
+                }
+            }
+
+            createBins() {
+                this.bins = {};
+                const binY = 580;
+
+                Object.values(CATEGORIES).forEach(cat => {
+                    const container = this.add.container(cat.binX, binY);
+
+                    const box = this.add.graphics();
+                    box.fillStyle(cat.color, 0.85);
+                    box.fillRoundedRect(-50, -50, 100, 120, 10);
+                    box.lineStyle(3, 0xffffff, 0.3);
+                    box.strokeRoundedRect(-50, -50, 100, 120, 10);
+
+                    const highlight = this.add.graphics();
+                    highlight.fillStyle(0xffffff, 0.3);
+                    highlight.fillRoundedRect(-55, -55, 110, 130, 12);
+                    highlight.setVisible(false);
+
+                    const label = this.add.text(0, 20, cat.name.toUpperCase(), {
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        color: '#ffffff'
+                    }).setOrigin(0.5);
+
+                    container.add([highlight, box, label]);
+                    container.catId = cat.id;
+                    container.highlight = highlight;
+
+                    this.bins[cat.id] = container;
+                });
+            }
+
+            createHUD() {
+                const hudBg = this.add.graphics();
+                hudBg.fillStyle(0x0a1914, 0.8);
+                hudBg.fillRect(0, 0, 1000, 70);
+                hudBg.lineStyle(2, 0x2ecc71, 0.3);
+                hudBg.lineBetween(0, 70, 1000, 70);
+
+                this.scoreText = this.add.text(20, 15, 'PONTOS: 0', { font: 'bold 18px Segoe UI', fill: '#f1c40f' });
+                this.rankText = this.add.text(20, 40, 'PATENTE: Reciclador (Lvl 1)', { font: '13px Segoe UI', fill: '#2ecc71' });
+
+                this.livesText = this.add.text(320, 15, 'VIDAS: ❤️❤️❤️❤️❤️', { font: 'bold 18px Segoe UI', fill: '#e74c3c' });
+                this.comboText = this.add.text(320, 40, 'COMBO: 0x', { font: '13px Segoe UI', fill: '#3498db' });
+
+                this.boostText = this.add.text(580, 15, '', { font: 'bold 15px Segoe UI', fill: '#1abc9c' });
+
+                const shopBtn = this.add.text(880, 20, '🛒 LOJA', {
+                    font: 'bold 16px Segoe UI',
+                    fill: '#ffffff',
+                    backgroundColor: '#27ae60',
+                    padding: { x: 12, y: 8 }
+                }).setInteractive({ useHandCursor: true });
+
+                shopBtn.on('pointerdown', () => {
+                    document.getElementById('shop-screen').classList.remove('hidden');
+                });
+            }
+
+            startGame() {
+                this.isGameRunning = true;
+            }
+
+            update(time, delta) {
+                if (!this.isGameRunning) return;
+
+                const deltaSec = delta / 1000;
+
+                // Boost Temporário
+                let speedMultiplier = 1.0;
+                if (this.slowBoostTimer > 0) {
+                    this.slowBoostTimer -= deltaSec;
+                    speedMultiplier = 0.7;
+                    this.boostText.setText(`⏱️ ESTEIRA LENTA: ${Math.ceil(this.slowBoostTimer)}s`);
+                    if (this.slowBoostTimer <= 0) {
+                        this.slowBoostTimer = 0;
+                        this.boostText.setText('');
+                    }
+                }
+
+                // Aceleração Progressiva
+                const progressiveSpeed = (this.baseConveyorSpeed + Math.floor(this.score / 50) * 8) * speedMultiplier;
+
+                this.conveyorLines.forEach(line => {
+                    line.x += progressiveSpeed * deltaSec;
+                    if (line.x > 1020) line.x = -20;
+                });
+
+                // Spawn
+                this.spawnTimer += delta;
+                const currentSpawnInterval = Math.max(1200, 2500 - Math.floor(this.score / 100) * 100);
+                if (this.spawnTimer >= currentSpawnInterval) {
+                    this.spawnItem();
+                    this.spawnTimer = 0;
+                }
+
+                // Movimento dos itens
+                for (let i = this.activeItems.length - 1; i >= 0; i--) {
+                    const item = this.activeItems[i];
+                    if (!item.isBeingDragged) {
+                        item.x += progressiveSpeed * deltaSec;
+
+                        if (item.x > 1030) {
+                            this.handleMissedItem(item);
+                            this.destroyItem(item, i);
+                        }
+                    }
+                }
+
+                this.updateHelpers(deltaSec);
+            }
+
+            spawnItem() {
+                const itemData = Phaser.Math.RND.pick(ITEM_TYPES);
+                const container = this.add.container(-40, this.conveyorY);
+
+                const icon = this.add.text(0, 0, itemData.icon, { font: '36px Arial' }).setOrigin(0.5);
+                const hitCircle = this.add.circle(0, 0, 50, 0xffffff, 0);
+
+                container.add([hitCircle, icon]);
+                container.setSize(100, 100);
+                container.setInteractive(new Phaser.Geom.Circle(0, 0, 55), Phaser.Geom.Circle.Contains);
+                this.input.setDraggable(container);
+
+                container.itemData = itemData;
+                container.isBeingDragged = false;
+
+                this.activeItems.push(container);
+            }
+
+            onDragStart(pointer, gameObject) {
+                if (!this.isGameRunning) return;
+                gameObject.isBeingDragged = true;
+                this.children.bringToTop(gameObject);
+                gameObject.setScale(1.3);
+            }
+
+            onDrag(pointer, gameObject, dragX, dragY) {
+                if (!this.isGameRunning || !gameObject.isBeingDragged) return;
+
+                gameObject.x = dragX;
+                gameObject.y = dragY;
+
+                Object.values(this.bins).forEach(bin => {
+                    const bounds = bin.getBounds();
+                    if (Phaser.Geom.Intersects.RectangleToRectangle(gameObject.getBounds(), bounds)) {
+                        bin.highlight.setVisible(true);
+                    } else {
+                        bin.highlight.setVisible(false);
+                    }
+                });
+            }
+
+            onDragEnd(pointer, gameObject) {
+                if (!this.isGameRunning) return;
+                gameObject.isBeingDragged = false;
+                gameObject.setScale(1.0);
+
+                let droppedInBin = false;
+                Object.values(this.bins).forEach(bin => bin.highlight.setVisible(false));
+
+                Object.values(this.bins).forEach(bin => {
+                    const bounds = bin.getBounds();
+                    if (Phaser.Geom.Intersects.RectangleToRectangle(gameObject.getBounds(), bounds)) {
+                        droppedInBin = true;
+                        this.processRecycle(gameObject, bin.catId);
+                    }
+                });
+
+                if (!droppedInBin) {
+                    this.tweens.add({
+                        targets: gameObject,
+                        y: this.conveyorY,
+                        duration: 200,
+                        ease: 'Power2'
+                    });
+                }
+            }
+
+            processRecycle(itemObject, binCatId) {
+                const itemData = itemObject.itemData;
+                const isCorrect = itemData.category.id === binCatId;
+                const index = this.activeItems.indexOf(itemObject);
+
+                if (isCorrect) {
+                    sfx.playSuccess();
+                    this.combo++;
+                    const comboBonus = Math.floor(this.combo / 5) * 5;
+                    const pointsGained = itemData.points + comboBonus;
+                    const xpGained = Math.round(itemData.xp * this.xpMultiplier);
+
+                    this.score += pointsGained;
+                    this.xp += xpGained;
+
+                    this.addFloatingText(itemObject.x, itemObject.y - 30, `+${pointsGained} pts`, '#2ecc71');
+                    this.addHistoryLog(`${itemData.name} ➔ ${itemData.category.name}`, true, pointsGained);
+
+                    if (this.combo === 15) {
+                        sfx.playBoost();
+                        this.triggerEcoBoost();
+                    }
+                } else {
+                    sfx.playError();
+                    this.combo = 0;
+                    this.score = Math.max(0, this.score - 5);
+                    this.addFloatingText(itemObject.x, itemObject.y - 30, `-5 pts`, '#e74c3c');
+                    this.addHistoryLog(`${itemData.name} Incorreto!`, false, -5);
+                }
+
+                this.destroyItem(itemObject, index);
+                this.updateHUDState();
+            }
+
+            handleMissedItem(itemObject) {
+                if (itemObject.itemData.category.id !== 'organico') {
+                    sfx.playError();
+                    this.lives--;
+                    this.combo = 0;
+                    this.addHistoryLog(`${itemObject.itemData.name} Perbido!`, false, 0);
+                    if (this.lives <= 0) {
+                        this.gameOver();
+                    }
+                }
+            }
+
+            updateHelpers(deltaSec) {
+                if (this.helper1Level > 0) {
+                    this.helper1Timer += deltaSec;
+                    if (this.helper1Timer >= 8) {
+                        this.helper1Timer = 0;
+                        this.autoRecycleOneItem(false);
+                    }
+                }
+
+                if (this.helper2Level > 0) {
+                    this.helper2Timer += deltaSec;
+                    if (this.helper2Timer >= 5) {
+                        this.helper2Timer = 0;
+                        this.autoRecycleOneItem(true);
+                    }
+                }
+            }
+
+            autoRecycleOneItem(allowComplex) {
+                const targetItem = this.activeItems.find(item => !item.isBeingDragged && (allowComplex || item.itemData.points <= 15));
+                if (targetItem) {
+                    this.addFloatingText(targetItem.x, targetItem.y - 20, '🤖 Ajudante', '#3498db');
+                    this.processRecycle(targetItem, targetItem.itemData.category.id);
+                }
+            }
+
+            triggerEcoBoost() {
+                this.cameras.main.flash(500, 46, 204, 113);
+                this.addFloatingText(500, 350, 'ECO-BOOST ATIVADO!', '#f1c40f', 30);
+                this.xpMultiplier *= 2;
+
+                this.time.delayedCall(10000, () => {
+                    this.xpMultiplier /= 2;
+                });
+            }
+
+            addHistoryLog(text, isSuccess, points) {
+                const list = document.getElementById('history-list');
+                const item = document.createElement('div');
+                item.className = `history-item ${isSuccess ? 'history-success' : 'history-error'}`;
+                item.innerHTML = `<span>${text}</span> <strong>${points >= 0 ? '+' : ''}${points}</strong>`;
+                list.insertBefore(item, list.firstChild);
+
+                if (list.children.length > 4) {
+                    list.removeChild(list.lastChild);
+                }
+            }
+
+            addFloatingText(x, y, text, color, size = 18) {
+                const txt = this.add.text(x, y, text, {
+                    font: `bold ${size}px Segoe UI`,
+                    fill: color
+                }).setOrigin(0.5);
+
+                this.tweens.add({
+                    targets: txt,
+                    y: y - 40,
+                    alpha: 0,
+                    duration: 800,
+                    onComplete: () => txt.destroy()
+                });
+            }
+
+            destroyItem(itemObject, index) {
+                if (index !== -1 && index < this.activeItems.length) {
+                    this.activeItems.splice(index, 1);
+                }
+                itemObject.destroy();
+            }
+
+            updateHUDState() {
+                const hearts = '❤️'.repeat(Math.max(0, this.lives));
+                this.livesText.setText(`VIDAS: ${hearts}`);
+                this.scoreText.setText(`PONTOS: ${this.score}`);
+                this.comboText.setText(`COMBO: ${this.combo}x`);
+
+                const currentRank = RANKS.slice().reverse().find(r => this.xp >= r.minXP) || RANKS[0];
+                this.rankText.setText(`PATENTE: ${currentRank.title} (Lvl ${currentRank.level})`);
+            }
+
+            gameOver() {
+                this.isGameRunning = false;
+                document.getElementById('game-over-stats').innerText = `Você atingiu ${this.score} pontos e acumulou ${this.xp} XP!`;
+                document.getElementById('game-over-screen').classList.remove('hidden');
+            }
+        }
+
+        // --- CONFIGURAÇÃO E EVENTOS ---
+        const config = {
+            type: Phaser.AUTO,
+            width: 1000,
+            height: 700,
+            parent: 'game-container',
+            scene: MainScene
+        };
+
+        const game = new Phaser.Game(config);
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('start-screen').classList.add('hidden');
+            const mainScene = game.scene.getScene('MainScene');
+            mainScene.startGame();
+        });
+
+        document.getElementById('close-shop-btn').addEventListener('click', () => {
+            document.getElementById('shop-screen').classList.add('hidden');
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            location.reload();
+        });
+
+        document.getElementById('buy-helper-1').addEventListener('click', () => {
+            const scene = game.scene.getScene('MainScene');
+            if (scene.score >= 100) {
+                scene.score -= 100;
+                scene.helper1Level++;
+                document.getElementById('cost-helper-1').innerText = 'Contratado ✓';
+                document.getElementById('buy-helper-1').disabled = true;
+                scene.updateHUDState();
+            }
+        });
+
+        document.getElementById('buy-helper-2').addEventListener('click', () => {
+            const scene = game.scene.getScene('MainScene');
+            if (scene.score >= 500) {
+                scene.score -= 500;
+                scene.helper2Level++;
+                document.getElementById('cost-helper-2').innerText = 'Contratado ✓';
+                document.getElementById('buy-helper-2').disabled = true;
+                scene.updateHUDState();
+            }
+        });
+
+        document.getElementById('buy-slow').addEventListener('click', () => {
+            const scene = game.scene.getScene('MainScene');
+            if (scene.score >= 150) {
+                scene.score -= 150;
+                scene.slowBoostTimer += 15;
+                scene.updateHUDState();
+            }
+        });
+
+        document.getElementById('buy-xp').addEventListener('click', () => {
+            const scene = game.scene.getScene('MainScene');
+            if (scene.score >= 400) {
+                scene.score -= 400;
+                scene.xpMultiplier += 0.2;
+                document.getElementById('cost-xp').innerText = 'Ativo (+20%) ✓';
+                document.getElementById('buy-xp').disabled = true;
+                scene.updateHUDState();
+            }
+        });
+    </script>
+</body>
+</html>
